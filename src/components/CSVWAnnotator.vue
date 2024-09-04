@@ -72,11 +72,11 @@
                       <v-autocomplete
                         density="compact"
                         hide-details
-                        class="mx-1"
+                        class="mx-1 flex-grow-1"
                         label="Term collection"
                         :items="conceptSchemes.values"
                         v-model="item.conceptScheme"
-                        @update:model-value="loadConcepts(item.conceptScheme)"
+                        @update:model-value="updateHeaderConceptScheme(item)"
                         return-object
                       ></v-autocomplete>
                       <v-progress-circular
@@ -88,12 +88,23 @@
                         density="compact"
                         hide-details
                         v-if="item.conceptScheme?.concepts"
-                        class="mx-1"
+                        class="mx-1 flex-grow-1"
                         label="Term"
                         :items="item.conceptScheme.concepts"
                         v-model="item.concept"
                       ></v-autocomplete>
                     </div>
+                  </template>
+
+                  <template #item.datatype="{ item }">
+                    <v-autocomplete
+                        density="compact"
+                        hide-details
+                        class="mx-1"
+                        label="Data type"
+                        :items="csvwDataTypes"
+                        v-model="item.datatype"
+                      ></v-autocomplete>
                   </template>
                 </v-data-table>
               </v-tabs-window-item>
@@ -112,6 +123,48 @@
 import {parse} from 'csv-parse/browser/esm';
 
 const sparqlEndpoint = import.meta.env.VITE_SPARQL_ENDPOINT;
+
+const csvwDataTypes = [
+  'anyURI',
+  'base64Binary',
+  'binary',
+  'boolean',
+  'byte',
+  'date',
+  'dateTime',
+  'dateTimeStamp',
+  'datetime',
+  'dayTimeDuration',
+  'decimal',
+  'double',
+  'duration',
+  'float',
+  'gDay',
+  'gMonth',
+  'gMonthDay',
+  'gYear',
+  'gYearMonth',
+  'hexBinary',
+  'int',
+  'integer',
+  'language',
+  'long',
+  'negativeInteger',
+  'nonNegativeInteger',
+  'nonPositiveInteger',
+  'normalizedString',
+  'number',
+  'positiveInteger',
+  'short',
+  'string',
+  'time',
+  'token',
+  'unsignedByte',
+  'unsignedInt',
+  'unsignedLong',
+  'unsignedShort',
+  'yearMonthDuration',
+]
 
 const sparqlQuery = async (query) => {
   return await fetch(sparqlEndpoint, {
@@ -159,7 +212,9 @@ export default {
       bindingHeaders: [
         { title: 'Header', value: 'text', width: "20%"},
         { title: 'Concept', value: 'concept' },
+        { title: 'Datatype', value: 'datatype' },
       ],
+      csvwDataTypes,
     };
   },
   mounted() {
@@ -182,6 +237,9 @@ export default {
         };
         if (header.concept) {
           mapping.propertyUrl = header.concept;
+        }
+        if (header.datatype) {
+          mapping.datatype = header.datatype;
         }
         return mapping;
       });
@@ -219,6 +277,7 @@ export default {
               text: r,
               conceptScheme: null,
               concept: null,
+              datatype: null,
             }));
           } else {
             this.dataRows.push(record);
@@ -247,6 +306,10 @@ export default {
       }
       parser.end();
     },
+    updateHeaderConceptScheme(item) {
+      item.concept = null;
+      this.loadConcepts(item.conceptScheme);
+    },
     async loadConceptSchemes() {
       const query = `
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -265,7 +328,7 @@ export default {
       }
     },
     async loadConcepts(conceptScheme) {
-      if (conceptScheme.loading) {
+      if (conceptScheme.loading || conceptScheme.concepts) {
         return;
       }
       conceptScheme.loading = true;
