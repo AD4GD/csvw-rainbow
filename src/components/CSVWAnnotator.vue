@@ -195,6 +195,8 @@ export default {
       delimiters: [
         {title: 'Comma (,)', value: ','},
         {title: 'Semicolon (;)', value: ';'},
+        {title: 'Tab', value: '\t'},
+        {title: 'Colon (:)', value: ':'},
       ],
       loadingCsvFile: false,
       dataRows: [],
