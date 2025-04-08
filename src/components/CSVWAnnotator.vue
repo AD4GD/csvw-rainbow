@@ -74,7 +74,7 @@
                     />
                   </template>
                   <template #item.concept="{ item }">
-                    <div class="d-flex flex-nowrap" v-if="!item.primaryKey">
+                    <div class="d-flex flex-nowrap">
                       <v-autocomplete
                         density="compact"
                         hide-details
@@ -248,7 +248,8 @@ export default {
         };
         if (header.primaryKey) {
           primaryKey.push(header.text);
-        } else if (header.concept) {
+        }
+        if (header.concept) {
           mapping.propertyUrl = header.concept;
         }
         if (header.datatype) {
