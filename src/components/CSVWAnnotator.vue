@@ -67,8 +67,14 @@
                   :items="headers"
                   :headers="bindingHeaders"
                 >
+                  <template #item.primaryKey="{ item }">
+                    <v-checkbox-btn
+                      v-model="item.primaryKey"
+                      :ripple="false"
+                    />
+                  </template>
                   <template #item.concept="{ item }">
-                    <div class="d-flex flex-nowrap">
+                    <div class="d-flex flex-nowrap" v-if="!item.primaryKey">
                       <v-autocomplete
                         density="compact"
                         hide-details
@@ -213,6 +219,7 @@ export default {
       headers: null,
       bindingHeaders: [
         { title: 'Header', value: 'text', width: "20%"},
+        { title: 'Primary key', value: 'primaryKey'},
         { title: 'Concept', value: 'concept' },
         { title: 'Datatype', value: 'datatype' },
       ],
@@ -233,18 +240,22 @@ export default {
       if (!this.headers || !this.conceptSchemes.values) {
         return null;
       }
-      const columns = this.headers.map(header => {
+      const primaryKey = [];
+      const columns = [];
+      for (let header of this.headers) {
         const mapping = {
           name: header.text,
         };
-        if (header.concept) {
+        if (header.primaryKey) {
+          primaryKey.push(header.text);
+        } else if (header.concept) {
           mapping.propertyUrl = header.concept;
         }
         if (header.datatype) {
           mapping.datatype = header.datatype;
         }
-        return mapping;
-      });
+        columns.push(mapping);
+      }
       const result = {
         '@context': "http://www.w3.org/ns/csvw",
         tableSchema: {
@@ -254,6 +265,9 @@ export default {
           header: true,
         },
       };
+      if (primaryKey.length) {
+        result.tableSchema.primaryKey = primaryKey;
+      }
       return result;
     },
   },
