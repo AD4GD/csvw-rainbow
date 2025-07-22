@@ -15,4 +15,8 @@ yarn dev  ## or yarn build to generate a production version
 
 ***
 
-This project was co-founded by the European Union in the context of the [AD4GD project](https://ad4gd.eu/).
+## Acknowledgements
+
+The work has been co-funded by the European Union and the United Kingdom under the 
+Horizon Europe [AD4GD Project](https://www.ogc.org/initiatives/ad4gd/).
+
